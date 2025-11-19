@@ -9,7 +9,9 @@
     "lint": "eslint",
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
-    "db:seed": "tsx prisma/seed.ts",
+    "db:seed": "tsx scripts/seed.ts",
+    "db:reset": "tsx scripts/reset-database.ts",
+    "db:reset:seed": "tsx scripts/reset-database.ts && tsx scripts/seed.ts",
     "db:studio": "prisma studio",
     "db:push": "prisma db push"
   },
