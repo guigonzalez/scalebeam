@@ -67,7 +67,7 @@ export default function HomePage() {
               <Link href="/signup">Solicite uma Demo</Link>
             </Button>
             <Button size="lg" variant="outline" className="text-base" asChild>
-              <Link href="#roi">Ver Planos</Link>
+              <Link href="/pricing">Ver Planos</Link>
             </Button>
           </div>
 
@@ -334,7 +334,7 @@ export default function HomePage() {
             <Badge className="mb-4">Payback em apenas 18 dias</Badge>
             <div className="mt-6">
               <Button size="lg" asChild>
-                <Link href="/signup">Calcular Seu ROI</Link>
+                <Link href="/roi-calculator">Calcular Seu ROI</Link>
               </Button>
             </div>
           </div>
