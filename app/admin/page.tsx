@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge"
 import { Folder, Image, CheckCircle2, Clock, AlertCircle } from "lucide-react"
 import Link from "next/link"
 
+export const dynamic = 'force-dynamic'
+
 async function getMetrics() {
   const [
     totalProjects,

@@ -6,6 +6,8 @@ import { FolderOpen, Upload, CheckCircle2, Clock } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 
+export const dynamic = 'force-dynamic'
+
 // Mock: usando organização Tech Startup Inc (primeiro cliente)
 const CLIENT_ORG_ID = "Tech Startup Inc"
 

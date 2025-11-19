@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import Link from "next/link"
 
+export const dynamic = 'force-dynamic'
+
 const planConfig = {
   STARTER: { label: "Starter", color: "bg-blue-500" },
   PROFESSIONAL: { label: "Professional", color: "bg-purple-500" },

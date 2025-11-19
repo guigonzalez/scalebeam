@@ -11,6 +11,8 @@ import { ProjectStatusChange } from "@/components/project-status-change"
 import { DownloadAllButton } from "@/components/creative-download-button"
 import { DownloadAssetButton, DownloadBriefingButton } from "@/components/download-asset-button"
 
+export const dynamic = 'force-dynamic'
+
 const statusConfig = {
   DRAFT: { label: "Rascunho", variant: "secondary" as const },
   IN_PRODUCTION: { label: "Em Produção", variant: "default" as const },

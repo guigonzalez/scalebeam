@@ -5,6 +5,8 @@ import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
 
+export const dynamic = 'force-dynamic'
+
 const statusConfig = {
   DRAFT: { label: "Rascunho", variant: "secondary" as const },
   IN_PRODUCTION: { label: "Em Produção", variant: "default" as const },

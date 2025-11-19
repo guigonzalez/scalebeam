@@ -10,6 +10,8 @@ import { ProjectApprovalActions } from "@/components/project-approval-actions"
 import { CreativeDownloadButton, DownloadAllButton } from "@/components/creative-download-button"
 import { AddCommentForm } from "@/components/add-comment-form"
 
+export const dynamic = 'force-dynamic'
+
 const statusConfig = {
   DRAFT: { label: "Rascunho", variant: "secondary" as const },
   IN_PRODUCTION: { label: "Em Produção", variant: "default" as const },

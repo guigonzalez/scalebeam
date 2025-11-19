@@ -5,6 +5,8 @@ import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
 
+export const dynamic = 'force-dynamic'
+
 const CLIENT_ORG_ID = "Tech Startup Inc"
 
 const statusConfig = {

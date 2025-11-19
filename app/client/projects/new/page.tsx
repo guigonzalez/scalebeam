@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input"
 import { Upload, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
+export const dynamic = 'force-dynamic'
+
 const CLIENT_ORG_ID = "Tech Startup Inc"
 
 async function getClientBrands() {
