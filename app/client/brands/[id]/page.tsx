@@ -1,41 +1,76 @@
-import { prisma } from "@/lib/prisma"
+"use client"
+
+import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Upload, Download } from "lucide-react"
+import { Upload, Download, Eye } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
-import { notFound } from "next/navigation"
+import { Lightbox } from "@/components/lightbox"
 
-export const dynamic = 'force-dynamic'
+interface Brand {
+  id: string
+  name: string
+  logoUrl: string | null
+  toneOfVoice: string | null
+  primaryColor: string | null
+  secondaryColor: string | null
+  organization: {
+    name: string
+  }
+  assets: Array<{
+    id: string
+    name: string
+    url: string
+    type: string
+    size: number | null
+  }>
+  templates: Array<{
+    id: string
+    name: string
+    description: string | null
+    imageUrl: string
+    category: string | null
+  }>
+  projects: Array<{
+    id: string
+    name: string
+    _count: {
+      creatives: number
+    }
+  }>
+}
 
-export default async function BrandDetailPage({
+export default function BrandDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
-  const { id } = await params
-  const brand = await prisma.brand.findUnique({
-    where: { id },
-    include: {
-      organization: true,
-      assets: {
-        orderBy: { createdAt: "desc" },
-      },
-      projects: {
-        include: {
-          _count: {
-            select: { creatives: true },
-          },
-        },
-        orderBy: { updatedAt: "desc" },
-      },
-    },
-  })
+  const [brand, setBrand] = useState<Brand | null>(null)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [lightboxIndex, setLightboxIndex] = useState(0)
+  const [brandId, setBrandId] = useState<string | null>(null)
+
+  useEffect(() => {
+    params.then(({ id }) => {
+      setBrandId(id)
+      fetch(`/api/client/brands/${id}`)
+        .then(res => res.json())
+        .then(data => setBrand(data))
+        .catch(console.error)
+    })
+  }, [])
 
   if (!brand) {
-    notFound()
+    return <div className="flex items-center justify-center min-h-screen">Carregando...</div>
   }
+
+  const templateImages = brand.templates.map(t => ({
+    url: t.imageUrl,
+    name: t.name,
+    alt: t.description || t.name
+  }))
 
   return (
     <div className="flex flex-col gap-6 p-8">
@@ -169,6 +204,59 @@ export default async function BrandDetailPage({
               </div>
             )}
           </Card>
+
+          {/* Templates */}
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Templates ({brand.templates.length})</h2>
+            </div>
+            {brand.templates.length > 0 ? (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {brand.templates.map((template, index) => (
+                  <div
+                    key={template.id}
+                    className="relative overflow-hidden rounded-lg border border-border group cursor-pointer"
+                    onClick={() => {
+                      setLightboxIndex(index)
+                      setLightboxOpen(true)
+                    }}
+                  >
+                    <div className="relative h-32">
+                      <Image
+                        src={template.imageUrl}
+                        alt={template.name}
+                        fill
+                        className="object-cover transition-transform group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                        <Eye className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    </div>
+                    <div className="p-3 bg-card">
+                      <p className="font-medium text-sm">{template.name}</p>
+                      {template.description && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {template.description}
+                        </p>
+                      )}
+                      {template.category && (
+                        <Badge variant="secondary" className="mt-2 text-xs">
+                          {template.category}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-border rounded-lg">
+                <p className="text-muted-foreground">Nenhum template cadastrado ainda</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Templates serão criados ao solicitar novos projetos
+                </p>
+              </div>
+            )}
+          </Card>
         </div>
 
         {/* Right Column - Projects */}
@@ -197,6 +285,18 @@ export default async function BrandDetailPage({
           </Card>
         </div>
       </div>
+
+      {/* Lightbox */}
+      {lightboxOpen && (
+        <Lightbox
+          images={templateImages}
+          currentIndex={lightboxIndex}
+          onClose={() => setLightboxOpen(false)}
+          onNext={() => setLightboxIndex((prev) => Math.min(prev + 1, templateImages.length - 1))}
+          onPrevious={() => setLightboxIndex((prev) => Math.max(prev - 1, 0))}
+          showNavigation={true}
+        />
+      )}
     </div>
   )
 }

@@ -6,9 +6,9 @@ import { notFound } from "next/navigation"
 import Image from "next/image"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { ProjectApprovalActions } from "@/components/project-approval-actions"
-import { CreativeDownloadButton, DownloadAllButton } from "@/components/creative-download-button"
+import { DownloadAllButton } from "@/components/creative-download-button"
 import { AddCommentForm } from "@/components/add-comment-form"
+import { CreativeApprovalGridGrouped } from "@/components/creative-approval-grid-grouped"
 
 export const dynamic = 'force-dynamic'
 
@@ -68,12 +68,6 @@ export default async function ClientProjectDetailPage({
             {project.brand.name} · {project.brand.organization.name}
           </p>
         </div>
-        {canApprove && (
-          <ProjectApprovalActions
-            projectId={project.id}
-            projectName={project.name}
-          />
-        )}
       </div>
 
       {/* Alert for actions needed */}
@@ -169,37 +163,12 @@ export default async function ClientProjectDetailPage({
             </div>
 
             {project.creatives.length > 0 ? (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {project.creatives.map((creative) => (
-                  <div
-                    key={creative.id}
-                    className="group relative overflow-hidden rounded-lg border border-border bg-muted"
-                  >
-                    <div className="relative aspect-square">
-                      <Image
-                        src={creative.thumbnailUrl || creative.url}
-                        alt={creative.name}
-                        fill
-                        className="object-cover transition-transform group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        <CreativeDownloadButton
-                          creativeId={creative.id}
-                          creativeName={creative.name}
-                          variant="secondary"
-                          size="sm"
-                        />
-                      </div>
-                    </div>
-                    <div className="p-3 bg-card">
-                      <p className="text-sm font-medium truncate">{creative.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {creative.width} × {creative.height} · {creative.format.toUpperCase()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <CreativeApprovalGridGrouped
+                creatives={project.creatives}
+                projectId={project.id}
+                projectName={project.name}
+                canApprove={canApprove}
+              />
             ) : (
               <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed border-border rounded-lg">
                 <p className="text-muted-foreground">
