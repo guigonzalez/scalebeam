@@ -64,7 +64,7 @@ export default function HomePage() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Button size="lg" className="text-base" asChild>
-              <Link href="/signup">Começar Gratuitamente</Link>
+              <Link href="/signup">Solicite uma Demo</Link>
             </Button>
             <Button size="lg" variant="outline" className="text-base" asChild>
               <Link href="#roi">Ver Planos</Link>
