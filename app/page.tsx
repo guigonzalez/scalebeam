@@ -75,15 +75,15 @@ export default function HomePage() {
           <div className="flex flex-wrap gap-6 justify-center text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-primary" />
-              Teste grátis 14 dias
+              Tecnologia de ponta
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-primary" />
-              Sem cartão de crédito
+              Suporte dedicado
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-primary" />
-              Cancele quando quiser
+              Resultados garantidos
             </div>
           </div>
         </div>
