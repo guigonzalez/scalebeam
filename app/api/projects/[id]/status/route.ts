@@ -10,13 +10,13 @@ import { ZodError } from "zod"
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { error: authError, session } = await requireAuth()
   if (authError) return authError
 
   try {
-    const projectId = params.id
+    const { id: projectId } = await params
     const body = await request.json()
 
     // Validar dados com Zod
