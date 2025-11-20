@@ -35,6 +35,8 @@ export default function NewProjectPage() {
   const [keyVisualFile, setKeyVisualFile] = useState<File | null>(null)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState(0)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isUploadingBriefing, setIsUploadingBriefing] = useState(false)
 
   useEffect(() => {
     // Fetch brands
@@ -62,7 +64,8 @@ export default function NewProjectPage() {
     }
   }, [selectedBrandId])
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    // Validações
     if (!projectName.trim()) {
       toast.error("Por favor, insira o nome do projeto")
       return
@@ -84,15 +87,72 @@ export default function NewProjectPage() {
       return
     }
 
-    toast.success("Projeto criado com sucesso!", {
-      description: requestNewTemplate
-        ? "O projeto foi criado e a equipe UXER está desenvolvendo o novo template."
-        : "A equipe UXER foi notificada e começará o trabalho em breve.",
-    })
+    setIsSubmitting(true)
 
-    setTimeout(() => {
-      window.location.href = "/client"
-    }, 2000)
+    try {
+      // 1. Upload de briefing (se houver)
+      let briefingCsvUrl = null
+      if (briefingFile) {
+        setIsUploadingBriefing(true)
+        const formData = new FormData()
+        formData.append("file", briefingFile)
+        formData.append("bucket", "briefings")
+        formData.append("folder", selectedBrandId)
+
+        const uploadResponse = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        })
+
+        if (!uploadResponse.ok) {
+          throw new Error("Falha ao fazer upload do briefing")
+        }
+
+        const uploadData = await uploadResponse.json()
+        briefingCsvUrl = uploadData.url
+        setIsUploadingBriefing(false)
+      }
+
+      // 2. Criar projeto
+      const projectData = {
+        name: projectName,
+        brandId: selectedBrandId,
+        templateId: requestNewTemplate ? null : selectedTemplateId,
+        briefingCsvUrl,
+        estimatedCreatives: parseInt(totalCreatives),
+      }
+
+      const projectResponse = await fetch("/api/client/projects", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(projectData),
+      })
+
+      if (!projectResponse.ok) {
+        const errorData = await projectResponse.json()
+        throw new Error(errorData.error || "Falha ao criar projeto")
+      }
+
+      const { project } = await projectResponse.json()
+
+      toast.success("Projeto criado com sucesso!", {
+        description: requestNewTemplate
+          ? "O projeto foi criado. Solicitação de novo template enviada para a equipe UXER."
+          : "A equipe UXER foi notificada e começará o trabalho em breve.",
+      })
+
+      // Redirecionar para a página do projeto
+      setTimeout(() => {
+        window.location.href = `/client/projects/${project.id}`
+      }, 1500)
+    } catch (error: any) {
+      console.error("Error creating project:", error)
+      toast.error(error.message || "Erro ao criar projeto")
+      setIsSubmitting(false)
+      setIsUploadingBriefing(false)
+    }
   }
 
   return (
@@ -371,10 +431,25 @@ Produto B,Oferta Limitada,Saiba Mais,R$ 149`}
             <div className="border-t border-border my-4"></div>
 
             <div className="space-y-2">
-              <Button className="w-full" onClick={handleSubmit}>
-                Criar Projeto
+              <Button
+                className="w-full"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    {isUploadingBriefing ? "Uploading briefing..." : "Criando projeto..."}
+                  </>
+                ) : (
+                  "Criar Projeto"
+                )}
               </Button>
-              <Button variant="outline" className="w-full" asChild>
+              <Button
+                variant="outline"
+                className="w-full"
+                asChild
+                disabled={isSubmitting}
+              >
                 <Link href="/client">Cancelar</Link>
               </Button>
             </div>
