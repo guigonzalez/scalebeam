@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     } else if (file.type === "application/pdf") {
       allowedTypes = ALLOWED_FILE_TYPES.documents
       maxSize = MAX_FILE_SIZES.document
-    } else if (ALLOWED_FILE_TYPES.spreadsheets.includes(file.type)) {
+    } else if (ALLOWED_FILE_TYPES.spreadsheets.includes(file.type as any)) {
       allowedTypes = ALLOWED_FILE_TYPES.spreadsheets
       maxSize = MAX_FILE_SIZES.spreadsheet
     } else {
