@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { readdirSync } from 'fs'
 import { join } from 'path'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
@@ -58,11 +59,14 @@ async function main() {
   await prisma.user.deleteMany()
 
   // Create Users
+  const defaultPasswordHash = await bcrypt.hash('password123', 10)
+
   const adminUser = await prisma.user.create({
     data: {
       email: 'admin@uxer.com',
       name: 'Admin UXER',
       role: 'ADMIN',
+      passwordHash: defaultPasswordHash,
     },
   })
 
@@ -71,6 +75,7 @@ async function main() {
       email: 'joao@techstartup.com',
       name: 'João Silva',
       role: 'CLIENT',
+      passwordHash: defaultPasswordHash,
     },
   })
 
@@ -79,6 +84,7 @@ async function main() {
       email: 'maria@fashionbrand.com',
       name: 'Maria Santos',
       role: 'CLIENT',
+      passwordHash: defaultPasswordHash,
     },
   })
 
