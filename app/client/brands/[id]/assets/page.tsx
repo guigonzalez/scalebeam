@@ -3,10 +3,12 @@ import { auth, signOut } from "@/lib/auth"
 import { redirect, notFound } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { LogOut, Upload, Download, Trash2, Image as ImageIcon } from "lucide-react"
+import { LogOut, Download, Trash2, Image as ImageIcon } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { formatFileSize } from "@/lib/constants"
+import { UploadAssetModal } from "@/components/upload-asset-modal"
+import { DeleteAssetButton } from "@/components/delete-asset-button"
 
 export const dynamic = "force-dynamic"
 
@@ -101,10 +103,7 @@ export default async function BrandAssetsPage({
             {brand.assets.length} arquivo(s)
           </p>
         </div>
-        <Button>
-          <Upload className="h-4 w-4 mr-2" />
-          Upload Assets
-        </Button>
+        <UploadAssetModal brandId={brand.id} brandName={brand.name} />
       </div>
 
       {/* Assets Grid */}
@@ -138,9 +137,11 @@ export default async function BrandAssetsPage({
                     <Download className="h-4 w-4" />
                   </a>
                 </Button>
-                <Button size="sm" variant="outline" className="flex-1">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <DeleteAssetButton
+                  brandId={brand.id}
+                  assetId={asset.id}
+                  assetName={asset.name}
+                />
               </div>
             </Card>
           ))}
@@ -153,10 +154,7 @@ export default async function BrandAssetsPage({
             <p className="text-sm text-muted-foreground mb-4">
               Faça upload de logos, fotos e outros arquivos da sua marca
             </p>
-            <Button>
-              <Upload className="h-4 w-4 mr-2" />
-              Upload Primeiro Asset
-            </Button>
+            <UploadAssetModal brandId={brand.id} brandName={brand.name} />
           </div>
         </Card>
       )}
