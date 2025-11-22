@@ -4,7 +4,6 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { LayoutDashboard, Folder, Users, Settings, Building2, UserCircle, Layers } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { LogoutButton } from "@/components/logout-button"
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -52,20 +51,6 @@ export function AdminSidebar() {
           )
         })}
       </nav>
-
-      {/* User info */}
-      <div className="border-t border-border p-4 space-y-3">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">
-            A
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium">Admin UXER</p>
-            <p className="text-xs text-muted-foreground truncate">admin@uxer.com</p>
-          </div>
-        </div>
-        <LogoutButton />
-      </div>
     </div>
   )
 }

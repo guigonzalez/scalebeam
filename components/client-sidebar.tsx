@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation"
 import { LayoutDashboard, Folder, Upload, FolderOpen, TrendingUp } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
-import { LogoutButton } from "@/components/logout-button"
 
 const navigation = [
   { name: "Dashboard", href: "/client", icon: LayoutDashboard, disabled: false },
@@ -76,20 +75,6 @@ export function ClientSidebar() {
           )
         })}
       </nav>
-
-      {/* User info */}
-      <div className="border-t border-border p-4 space-y-3">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">
-            J
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium">João Silva</p>
-            <p className="text-xs text-muted-foreground truncate">Tech Startup Inc</p>
-          </div>
-        </div>
-        <LogoutButton />
-      </div>
     </div>
   )
 }
