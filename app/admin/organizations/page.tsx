@@ -9,6 +9,7 @@ import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { OrganizationModal } from "@/components/organization-modal"
+import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog"
 
 export const dynamic = 'force-dynamic'
 
@@ -153,6 +154,11 @@ export default async function OrganizationsPage() {
                             <Edit className="h-4 w-4" />
                           </Button>
                         </OrganizationModal>
+                        <DeleteConfirmationDialog
+                          resourceType="Organization"
+                          resourceName={org.name}
+                          endpoint={`/api/admin/organizations/${org.id}`}
+                        />
                       </div>
                     </td>
                   </tr>

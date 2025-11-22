@@ -10,6 +10,7 @@ import { UploadCreativesModal } from "@/components/upload-creatives-modal"
 import { ProjectStatusChange } from "@/components/project-status-change"
 import { DownloadAllButton } from "@/components/creative-download-button"
 import { DownloadAssetButton, DownloadBriefingButton } from "@/components/download-asset-button"
+import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog"
 
 export const dynamic = 'force-dynamic'
 
@@ -168,6 +169,15 @@ export default async function ProjectDetailPage({
                     key={creative.id}
                     className="group relative overflow-hidden rounded-lg border border-border bg-muted"
                   >
+                    <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <DeleteConfirmationDialog
+                        resourceType="Criativo"
+                        resourceName={creative.name}
+                        endpoint={`/api/admin/creatives/${creative.id}`}
+                        variant="destructive"
+                        size="sm"
+                      />
+                    </div>
                     <div className="relative aspect-square">
                       <Image
                         src={creative.thumbnailUrl || creative.url}

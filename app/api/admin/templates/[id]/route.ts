@@ -34,3 +34,31 @@ export async function PATCH(
     )
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { error: authError, session } = await requireAuth()
+  if (authError) return authError
+
+  if (session!.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+  }
+
+  try {
+    const { id } = await params
+
+    await prisma.template.delete({
+      where: { id },
+    })
+
+    return NextResponse.json({ success: true })
+  } catch (error: any) {
+    console.error("Error deleting template:", error)
+    return NextResponse.json(
+      { error: error.message || "Failed to delete template" },
+      { status: 500 }
+    )
+  }
+}

@@ -9,6 +9,7 @@ import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { PROJECT_STATUS_CONFIG } from "@/lib/constants"
+import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog"
 
 export const dynamic = "force-dynamic"
 
@@ -181,11 +182,19 @@ export default async function AdminProjectsPage() {
                       })}
                     </div>
 
-                    <Button asChild className="w-full">
-                      <Link href={`/admin/projects/${project.id}`}>
-                        Ver Detalhes
-                      </Link>
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button asChild className="flex-1">
+                        <Link href={`/admin/projects/${project.id}`}>
+                          Ver Detalhes
+                        </Link>
+                      </Button>
+                      <DeleteConfirmationDialog
+                        resourceType="Projeto"
+                        resourceName={project.name}
+                        endpoint={`/api/admin/projects/${project.id}`}
+                        variant="outline"
+                      />
+                    </div>
                   </Card>
                 ))}
               </div>

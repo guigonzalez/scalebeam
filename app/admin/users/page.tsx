@@ -8,6 +8,7 @@ import { UserCircle, Plus, Edit } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { UserModal } from "@/components/user-modal"
+import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog"
 
 export const dynamic = 'force-dynamic'
 
@@ -94,6 +95,11 @@ export default async function UsersPage() {
                           <Edit className="h-4 w-4" />
                         </Button>
                       </UserModal>
+                      <DeleteConfirmationDialog
+                        resourceType="Usuário"
+                        resourceName={user.name}
+                        endpoint={`/api/admin/users/${user.id}`}
+                      />
                     </div>
                   </td>
                 </tr>

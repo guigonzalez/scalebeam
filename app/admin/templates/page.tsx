@@ -9,6 +9,7 @@ import Image from "next/image"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { AdminTemplateModal } from "@/components/admin-template-modal"
+import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog"
 
 export const dynamic = 'force-dynamic'
 
@@ -152,6 +153,11 @@ export default async function TemplatesPage() {
                             <Edit className="h-4 w-4" />
                           </Button>
                         </AdminTemplateModal>
+                        <DeleteConfirmationDialog
+                          resourceType="Template"
+                          resourceName={template.name}
+                          endpoint={`/api/admin/templates/${template.id}`}
+                        />
                       </div>
                     </td>
                   </tr>
