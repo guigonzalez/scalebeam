@@ -76,13 +76,23 @@ DECLARE
   v_current_brands INT;
   v_max_creatives INT;
   v_current_creatives INT;
+  v_brand_id TEXT;
 BEGIN
+  -- Pegar brandId dependendo da tabela
+  IF TG_TABLE_NAME = 'Brand' THEN
+    v_brand_id := NEW.id;
+  ELSIF TG_TABLE_NAME = 'Creative' THEN
+    SELECT p."brandId" INTO v_brand_id
+    FROM "Project" p
+    WHERE p.id = NEW."projectId";
+  END IF;
+
   -- Pegar organizationId do brand
   SELECT b."organizationId", o."maxBrands", o."maxCreatives"
   INTO v_organization_id, v_max_brands, v_max_creatives
   FROM "Brand" b
   JOIN "Organization" o ON o.id = b."organizationId"
-  WHERE b.id = NEW."brandId";
+  WHERE b.id = v_brand_id;
 
   -- Verificar limite de brands
   IF TG_TABLE_NAME = 'Brand' AND TG_OP = 'INSERT' THEN
