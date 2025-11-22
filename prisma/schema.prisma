@@ -148,8 +148,8 @@ model Template {
 model Project {
   id                  String        @id @default(cuid())
   name                String
-  briefingCsvUrl      String?
-  briefingData        String?       // JSON string com dados do CSV
+  briefingUrl         String?       // URL do arquivo de briefing (CSV, DOC, PDF, etc)
+  briefingData        String?       // JSON string com dados parseados (se aplicável)
   estimatedCreatives  Int           @default(0)
   totalCreatives      Int?          // Total de criativos do projeto
   status              ProjectStatus @default(DRAFT)

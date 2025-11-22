@@ -91,7 +91,7 @@ export default function NewProjectPage() {
 
     try {
       // 1. Upload de briefing (se houver)
-      let briefingCsvUrl = null
+      let briefingUrl = null
       if (briefingFile) {
         setIsUploadingBriefing(true)
         const formData = new FormData()
@@ -109,7 +109,7 @@ export default function NewProjectPage() {
         }
 
         const uploadData = await uploadResponse.json()
-        briefingCsvUrl = uploadData.url
+        briefingUrl = uploadData.url
         setIsUploadingBriefing(false)
       }
 
@@ -118,7 +118,7 @@ export default function NewProjectPage() {
         name: projectName,
         brandId: selectedBrandId,
         templateId: requestNewTemplate ? null : selectedTemplateId,
-        briefingCsvUrl,
+        briefingUrl,
         estimatedCreatives: parseInt(totalCreatives),
       }
 
@@ -358,37 +358,33 @@ export default function NewProjectPage() {
           {/* Briefing Upload */}
           <Card className="p-6">
             <h2 className="text-lg font-semibold mb-4">
-              Briefing (CSV) <span className="text-muted-foreground text-sm font-normal">(opcional)</span>
+              Material de Briefing <span className="text-muted-foreground text-sm font-normal">(opcional)</span>
             </h2>
             <div
               className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-lg p-8 text-center hover:bg-secondary/20 transition-colors cursor-pointer"
-              onClick={() => document.getElementById('csv-upload')?.click()}
+              onClick={() => document.getElementById('briefing-upload')?.click()}
             >
               <Upload className="h-12 w-12 text-muted-foreground/50 mb-3" />
               <p className="text-sm font-medium mb-1">
-                {briefingFile ? briefingFile.name : "Arraste um arquivo CSV aqui ou clique para selecionar"}
+                {briefingFile ? briefingFile.name : "Arraste arquivos de briefing aqui ou clique para selecionar"}
               </p>
               <p className="text-xs text-muted-foreground">
-                O CSV deve conter colunas como: produto, headline, cta, preço, etc.
+                CSV, DOC, DOCX, PDF, imagens ou outros materiais de referência
               </p>
               <input
-                id="csv-upload"
+                id="briefing-upload"
                 type="file"
                 className="hidden"
-                accept=".csv"
+                accept=".csv,.doc,.docx,.pdf,image/*"
                 onChange={(e) => setBriefingFile(e.target.files?.[0] || null)}
               />
             </div>
 
-            <div className="mt-4 p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground mb-2">
-                <strong>Formato do CSV:</strong>
+            <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <p className="text-xs text-blue-900 dark:text-blue-100">
+                <strong>💡 Dica:</strong> Você pode enviar planilhas com dados de produtos, documentos de estratégia,
+                imagens de referência ou qualquer material que ajude a IA a entender melhor a campanha.
               </p>
-              <pre className="text-xs bg-background p-3 rounded border border-border overflow-x-auto">
-{`product,headline,cta,price
-Produto A,Promoção Especial,Compre Agora,R$ 99
-Produto B,Oferta Limitada,Saiba Mais,R$ 149`}
-              </pre>
             </div>
           </Card>
         </div>

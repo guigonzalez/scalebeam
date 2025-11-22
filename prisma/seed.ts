@@ -268,7 +268,7 @@ async function main() {
   const project1 = await prisma.project.create({
     data: {
       name: 'Black Friday Mercado Livre 2024',
-      briefingCsvUrl: 'https://example.com/briefing-blackfriday-ml.csv',
+      briefingUrl: 'https://example.com/briefing-blackfriday-ml.csv',
       briefingData: JSON.stringify([
         { categoria: 'Eletrônicos', desconto: 'Até 70% OFF', cta: 'Aproveitar', frete: 'Grátis' },
         { categoria: 'Moda', desconto: 'Até 60% OFF', cta: 'Ver Ofertas', frete: 'Grátis' },
@@ -283,7 +283,7 @@ async function main() {
   const project2 = await prisma.project.create({
     data: {
       name: 'Meli+ Premium 2025',
-      briefingCsvUrl: 'https://example.com/briefing-meliplus.csv',
+      briefingUrl: 'https://example.com/briefing-meliplus.csv',
       briefingData: JSON.stringify([
         { beneficio: 'Frete Grátis', headline: 'Economize em todas as compras', cta: 'Assinar Agora' },
         { beneficio: 'Ofertas Exclusivas', headline: 'Acesso antecipado', cta: 'Saiba Mais' },
@@ -297,7 +297,7 @@ async function main() {
   const project3 = await prisma.project.create({
     data: {
       name: 'Coleção Verão 2025',
-      briefingCsvUrl: 'https://example.com/briefing-verao.csv',
+      briefingUrl: 'https://example.com/briefing-verao.csv',
       briefingData: JSON.stringify([
         { product: 'Vestido Floral', headline: 'Frescor do Verão', cta: 'Comprar', price: 'R$ 299' },
         { product: 'Sandália Comfort', headline: 'Estilo e Conforto', cta: 'Ver Mais', price: 'R$ 179' },
@@ -312,7 +312,7 @@ async function main() {
   const project4 = await prisma.project.create({
     data: {
       name: 'Dia das Mães - GreenLife',
-      briefingCsvUrl: 'https://example.com/briefing-maes.csv',
+      briefingUrl: 'https://example.com/briefing-maes.csv',
       estimatedCreatives: 20,
       status: 'READY',
       brandId: brand3.id,
@@ -349,7 +349,7 @@ async function main() {
   const project8 = await prisma.project.create({
     data: {
       name: 'Campanha Novembro 2025',
-      briefingCsvUrl: 'https://example.com/briefing-nov25.csv',
+      briefingUrl: 'https://example.com/briefing-nov25.csv',
       briefingData: JSON.stringify([
         { localidade: 'Aracariguama', formato: 'Multi', quantidade: '14 peças' },
         { localidade: 'Cajamar', formato: 'Multi', quantidade: '14 peças' },

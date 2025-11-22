@@ -10,7 +10,7 @@ export const createProjectSchema = z.object({
     .max(100, "Nome deve ter no máximo 100 caracteres"),
   brandId: z.string().cuid("ID da marca inválido"),
   templateId: z.string().cuid("ID do template inválido").optional().nullable(),
-  briefingCsvUrl: z.string().url("URL do CSV inválida").optional().nullable(),
+  briefingUrl: z.string().url("URL do arquivo de briefing inválida").optional().nullable(),
   briefingData: z.string().optional().nullable(),
   estimatedCreatives: z
     .number()

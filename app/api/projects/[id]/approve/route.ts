@@ -26,7 +26,12 @@ export async function PATCH(
           select: {
             organizationId: true,
             name: true,
+            id: true,
           },
+        },
+        creatives: {
+          orderBy: { createdAt: "asc" },
+          take: 1, // Pega o primeiro criativo como referência visual
         },
       },
     })
@@ -95,6 +100,34 @@ export async function PATCH(
           projectId,
           userId: session!.user.id,
           content: validatedData.comment,
+        },
+      })
+    }
+
+    // Se é um projeto de TEMPLATE_CREATION, criar automaticamente um Template
+    if (project.projectType === "TEMPLATE_CREATION") {
+      // Usar o primeiro criativo como imagem de referência do template
+      const referenceImage = project.creatives[0]?.url || "/placeholder-template.jpg"
+
+      await prisma.template.create({
+        data: {
+          name: project.name,
+          description: `Template criado a partir do projeto: ${project.name}`,
+          imageUrl: referenceImage,
+          brandId: project.brand.id,
+          projectId: project.id,
+          templateStatus: "APPROVED",
+          isActive: true,
+        },
+      })
+
+      // Registrar log de criação do template
+      await prisma.activityLog.create({
+        data: {
+          organizationId: project.brand.organizationId,
+          userId: session!.user.id,
+          action: "template_created",
+          description: `Template "${project.name}" criado automaticamente a partir do projeto aprovado`,
         },
       })
     }

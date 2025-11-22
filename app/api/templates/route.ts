@@ -14,6 +14,7 @@ export async function GET(request: Request) {
       where: {
         isActive: true,
         brandId: brandId,
+        templateStatus: "APPROVED", // Apenas templates aprovados
       },
       orderBy: { name: "asc" },
     })

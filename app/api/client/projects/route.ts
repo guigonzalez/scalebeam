@@ -162,16 +162,21 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Determinar tipo de projeto
+    // Se não tem templateId, é um projeto de criação de template
+    const projectType = !validatedData.templateId ? "TEMPLATE_CREATION" : "CAMPAIGN"
+
     // Criar projeto
     const project = await prisma.project.create({
       data: {
         name: validatedData.name,
         brandId: validatedData.brandId,
         templateId: validatedData.templateId || null,
-        briefingCsvUrl: validatedData.briefingCsvUrl || null,
+        briefingUrl: validatedData.briefingUrl || null,
         briefingData: validatedData.briefingData || null,
         estimatedCreatives: validatedData.estimatedCreatives,
         status: "DRAFT",
+        projectType,
       },
       include: {
         brand: {
