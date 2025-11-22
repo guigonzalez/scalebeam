@@ -18,6 +18,15 @@ export const createProjectSchema = z.object({
     .min(0, "Número de criativos não pode ser negativo")
     .max(10000, "Número de criativos não pode exceder 10.000")
     .default(0),
+  newTemplateRequest: z
+    .object({
+      name: z.string().min(3, "Nome do template deve ter no mínimo 3 caracteres"),
+      keyVisualUrl: z.string().url("URL do Key Visual inválida"),
+      platforms: z.array(z.string()).min(1, "Selecione pelo menos uma plataforma"),
+      formats: z.array(z.string()).min(1, "Selecione pelo menos um formato"),
+    })
+    .optional()
+    .nullable(),
 })
 
 export type CreateProjectInput = z.infer<typeof createProjectSchema>

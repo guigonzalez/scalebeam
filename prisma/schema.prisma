@@ -127,6 +127,8 @@ model Template {
   description    String?
   imageUrl       String         // Imagem de referência da campanha
   category       String?        // banner, stories, feed, etc
+  platforms      String?        // JSON array: ["facebook", "instagram", "google"]
+  formats        String?        // JSON array: ["feed", "stories", "banner"]
   isActive       Boolean        @default(true)
   templateStatus TemplateStatus @default(APPROVED)
   createdAt      DateTime       @default(now())

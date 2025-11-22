@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Upload, ArrowLeft, Plus, CheckCircle2, Eye } from "lucide-react"
+import { Upload, ArrowLeft, CheckCircle2, Eye, Sparkles, FileImage } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { toast } from "sonner"
@@ -16,6 +16,7 @@ interface Template {
   description: string | null
   imageUrl: string
   category: string | null
+  templateStatus: string
 }
 
 interface Brand {
@@ -23,20 +24,19 @@ interface Brand {
   name: string
 }
 
-export default function NewProjectPage() {
+export default function NewCampaignPage() {
   const [brands, setBrands] = useState<Brand[]>([])
   const [templates, setTemplates] = useState<Template[]>([])
   const [selectedBrandId, setSelectedBrandId] = useState("")
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null)
-  const [requestNewTemplate, setRequestNewTemplate] = useState(false)
   const [projectName, setProjectName] = useState("")
   const [totalCreatives, setTotalCreatives] = useState("")
   const [briefingFile, setBriefingFile] = useState<File | null>(null)
-  const [keyVisualFile, setKeyVisualFile] = useState<File | null>(null)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isUploadingBriefing, setIsUploadingBriefing] = useState(false)
+  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     // Fetch brands
@@ -47,13 +47,14 @@ export default function NewProjectPage() {
   }, [])
 
   useEffect(() => {
-    // Fetch templates when brand is selected
+    // Fetch ONLY APPROVED templates when brand is selected
     if (selectedBrandId) {
-      fetch(`/api/templates?brandId=${selectedBrandId}`)
+      fetch(`/api/templates?brandId=${selectedBrandId}&status=APPROVED`)
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data)) {
-            setTemplates(data)
+            // Filtrar apenas templates aprovados no client-side também
+            setTemplates(data.filter((t: Template) => t.templateStatus === 'APPROVED'))
           } else {
             setTemplates([])
           }
@@ -67,7 +68,7 @@ export default function NewProjectPage() {
   const handleSubmit = async () => {
     // Validações
     if (!projectName.trim()) {
-      toast.error("Por favor, insira o nome do projeto")
+      toast.error("Por favor, insira o nome da campanha")
       return
     }
     if (!selectedBrandId) {
@@ -78,12 +79,8 @@ export default function NewProjectPage() {
       toast.error("Por favor, insira o total de criativos")
       return
     }
-    if (!requestNewTemplate && !selectedTemplateId) {
-      toast.error("Por favor, selecione um template ou solicite um novo")
-      return
-    }
-    if (requestNewTemplate && !keyVisualFile) {
-      toast.error("Por favor, faça upload do Key Visual para o novo template")
+    if (!selectedTemplateId) {
+      toast.error("Por favor, selecione um template aprovado")
       return
     }
 
@@ -113,11 +110,11 @@ export default function NewProjectPage() {
         setIsUploadingBriefing(false)
       }
 
-      // 2. Criar projeto
+      // 2. Criar campanha
       const projectData = {
         name: projectName,
         brandId: selectedBrandId,
-        templateId: requestNewTemplate ? null : selectedTemplateId,
+        templateId: selectedTemplateId,
         briefingUrl,
         estimatedCreatives: parseInt(totalCreatives),
       }
@@ -132,15 +129,13 @@ export default function NewProjectPage() {
 
       if (!projectResponse.ok) {
         const errorData = await projectResponse.json()
-        throw new Error(errorData.error || "Falha ao criar projeto")
+        throw new Error(errorData.error || "Falha ao criar campanha")
       }
 
       const { project } = await projectResponse.json()
 
-      toast.success("Projeto criado com sucesso!", {
-        description: requestNewTemplate
-          ? "Nossa IA começará a criar seu template personalizado baseado no Key Visual."
-          : "Nossa IA ScaleBeam está processando sua solicitação e criará os criativos em breve.",
+      toast.success("Campanha criada com sucesso!", {
+        description: "Nossa IA ScaleBeam está processando sua solicitação e criará os criativos em breve.",
       })
 
       // Redirecionar para a página do projeto
@@ -148,8 +143,8 @@ export default function NewProjectPage() {
         window.location.href = `/client/projects/${project.id}`
       }, 1500)
     } catch (error: any) {
-      console.error("Error creating project:", error)
-      toast.error(error.message || "Erro ao criar projeto")
+      console.error("Error creating campaign:", error)
+      toast.error(error.message || "Erro ao criar campanha")
       setIsSubmitting(false)
       setIsUploadingBriefing(false)
     }
@@ -160,15 +155,21 @@ export default function NewProjectPage() {
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="outline" size="sm" asChild>
-          <Link href="/client">
+          <Link href="/client/projects">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar
           </Link>
         </Button>
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Novo Projeto</h1>
-          <p className="text-muted-foreground mt-1">Crie um novo projeto de criativos</p>
+        <div className="flex-1">
+          <h1 className="text-3xl font-semibold tracking-tight">Nova Campanha</h1>
+          <p className="text-muted-foreground mt-1">Crie criativos a partir de um template aprovado</p>
         </div>
+        <Button variant="outline" asChild>
+          <Link href="/client/projects/new-template">
+            <Sparkles className="h-4 w-4 mr-2" />
+            Solicitar Novo Template
+          </Link>
+        </Button>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -179,7 +180,7 @@ export default function NewProjectPage() {
             <h2 className="text-lg font-semibold mb-4">Informações Básicas</h2>
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium mb-2 block">Nome do Projeto *</label>
+                <label className="text-sm font-medium mb-2 block">Nome da Campanha *</label>
                 <Input
                   placeholder="Ex: Campanha Black Friday 2024"
                   value={projectName}
@@ -205,7 +206,7 @@ export default function NewProjectPage() {
 
               <div>
                 <label className="text-sm font-medium mb-2 block">
-                  Total de Criativos do Projeto *
+                  Total de Criativos *
                 </label>
                 <Input
                   type="number"
@@ -214,7 +215,7 @@ export default function NewProjectPage() {
                   onChange={(e) => setTotalCreatives(e.target.value)}
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Informe o número total de criativos que serão gerados neste projeto
+                  Informe o número total de criativos que serão gerados nesta campanha
                 </p>
               </div>
             </div>
@@ -223,59 +224,55 @@ export default function NewProjectPage() {
           {/* Template Selection */}
           <Card className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Template *</h2>
-              <Button
-                variant={requestNewTemplate ? "default" : "outline"}
-                size="sm"
-                onClick={() => {
-                  setRequestNewTemplate(!requestNewTemplate)
-                  if (!requestNewTemplate) {
-                    setSelectedTemplateId(null)
-                  }
-                }}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                {requestNewTemplate ? "Cancelar Novo Template" : "Solicitar Novo Template"}
-              </Button>
+              <h2 className="text-lg font-semibold">Template Aprovado *</h2>
             </div>
 
-            {!requestNewTemplate ? (
-              <>
-                {templates.length === 0 && selectedBrandId && (
-                  <div className="p-8 text-center border-2 border-dashed border-border rounded-lg">
-                    <p className="text-muted-foreground">
-                      Nenhum template encontrado para esta marca.
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Você pode solicitar um novo template clicando no botão acima.
-                    </p>
-                  </div>
-                )}
-                {templates.length === 0 && !selectedBrandId && (
-                  <div className="p-8 text-center border-2 border-dashed border-border rounded-lg">
-                    <p className="text-muted-foreground">
-                      Selecione uma marca para ver os templates disponíveis.
-                    </p>
-                  </div>
-                )}
-                {templates.length > 0 && (
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {templates.map((template, index) => (
-                      <div
-                        key={template.id}
-                        onClick={() => setSelectedTemplateId(template.id)}
-                        className={`group relative overflow-hidden rounded-lg border-2 transition-all cursor-pointer ${
-                          selectedTemplateId === template.id
-                            ? "border-primary ring-2 ring-primary ring-offset-2"
-                            : "border-border hover:border-primary/50"
-                        }`}
-                      >
-                        <div className="relative h-32">
+            {templates.length === 0 && selectedBrandId && (
+              <div className="p-8 text-center border-2 border-dashed border-border rounded-lg">
+                <p className="text-muted-foreground">
+                  Nenhum template aprovado encontrado para esta marca.
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Você precisa de um template aprovado para criar uma campanha.
+                </p>
+                <Button variant="outline" className="mt-4" asChild>
+                  <Link href="/client/projects/new-template">
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Solicitar Novo Template
+                  </Link>
+                </Button>
+              </div>
+            )}
+            {templates.length === 0 && !selectedBrandId && (
+              <div className="p-8 text-center border-2 border-dashed border-border rounded-lg">
+                <p className="text-muted-foreground">
+                  Selecione uma marca para ver os templates disponíveis.
+                </p>
+              </div>
+            )}
+            {templates.length > 0 && (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {templates.map((template, index) => (
+                  <div
+                    key={template.id}
+                    onClick={() => setSelectedTemplateId(template.id)}
+                    className={`group relative overflow-hidden rounded-lg border-2 transition-all cursor-pointer ${
+                      selectedTemplateId === template.id
+                        ? "border-primary ring-2 ring-primary ring-offset-2"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                  >
+                    <div className="relative h-32 bg-muted">
+                      {!imageErrors.has(template.id) && template.imageUrl ? (
+                        <>
                           <Image
                             src={template.imageUrl}
                             alt={template.name}
                             fill
                             className="object-cover transition-transform group-hover:scale-105"
+                            onError={() => {
+                              setImageErrors(prev => new Set(prev).add(template.id))
+                            }}
                           />
                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
                             <Button
@@ -291,66 +288,31 @@ export default function NewProjectPage() {
                               <Eye className="h-6 w-6" />
                             </Button>
                           </div>
+                        </>
+                      ) : (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
+                          <FileImage className="h-12 w-12 mb-2" />
+                          <p className="text-xs">Preview indisponível</p>
                         </div>
-                        <div className="p-3 bg-card">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <p className="font-medium text-sm">{template.name}</p>
-                              {template.description && (
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  {template.description}
-                                </p>
-                              )}
-                            </div>
-                            {selectedTemplateId === template.id && (
-                              <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
-                            )}
-                          </div>
+                      )}
+                    </div>
+                    <div className="p-3 bg-card">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="font-medium text-sm">{template.name}</p>
+                          {template.description && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {template.description}
+                            </p>
+                          )}
                         </div>
+                        {selectedTemplateId === template.id && (
+                          <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
+                        )}
                       </div>
-                    ))}
+                    </div>
                   </div>
-                )}
-              </>
-            ) : (
-              <div className="space-y-4">
-                <div className="p-4 bg-muted/50 rounded-lg border border-border">
-                  <p className="text-sm text-muted-foreground">
-                    Ao solicitar um novo template, nossa IA analisará seu Key Visual e criará um template personalizado. Após aprovação, você poderá usar esse template em campanhas futuras.
-                  </p>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Nome do Novo Template
-                  </label>
-                  <Input placeholder="Ex: Banner Verão 2024" />
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Key Visual (KV) * - Referência visual da campanha
-                  </label>
-                  <div
-                    className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-lg p-8 text-center hover:bg-secondary/20 transition-colors cursor-pointer"
-                    onClick={() => document.getElementById('kv-upload')?.click()}
-                  >
-                    <Upload className="h-12 w-12 text-muted-foreground/50 mb-3" />
-                    <p className="text-sm font-medium mb-1">
-                      {keyVisualFile ? keyVisualFile.name : "Arraste o Key Visual aqui ou clique para selecionar"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      PNG, JPG ou PDF até 10MB
-                    </p>
-                    <input
-                      id="kv-upload"
-                      type="file"
-                      className="hidden"
-                      accept="image/*,.pdf"
-                      onChange={(e) => setKeyVisualFile(e.target.files?.[0] || null)}
-                    />
-                  </div>
-                </div>
+                ))}
               </div>
             )}
           </Card>
@@ -395,7 +357,7 @@ export default function NewProjectPage() {
             <h2 className="text-lg font-semibold mb-4">Resumo</h2>
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Projeto:</span>
+                <span className="text-muted-foreground">Campanha:</span>
                 <span className="font-medium">{projectName || "-"}</span>
               </div>
               <div className="flex justify-between text-sm">
@@ -411,11 +373,9 @@ export default function NewProjectPage() {
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Template:</span>
                 <span className="font-medium">
-                  {requestNewTemplate
-                    ? "Novo Template (aguardando KV)"
-                    : selectedTemplateId
-                      ? templates.find(t => t.id === selectedTemplateId)?.name
-                      : "-"}
+                  {selectedTemplateId
+                    ? templates.find(t => t.id === selectedTemplateId)?.name
+                    : "-"}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
@@ -434,10 +394,10 @@ export default function NewProjectPage() {
               >
                 {isSubmitting ? (
                   <>
-                    {isUploadingBriefing ? "Uploading briefing..." : "Criando projeto..."}
+                    {isUploadingBriefing ? "Uploading briefing..." : "Criando campanha..."}
                   </>
                 ) : (
-                  "Criar Projeto"
+                  "Criar Campanha"
                 )}
               </Button>
               <Button
@@ -446,14 +406,14 @@ export default function NewProjectPage() {
                 asChild
                 disabled={isSubmitting}
               >
-                <Link href="/client">Cancelar</Link>
+                <Link href="/client/projects">Cancelar</Link>
               </Button>
             </div>
           </Card>
 
           <Card className="p-4 bg-primary/10 border-primary/20">
             <p className="text-xs text-muted-foreground">
-              <strong>Nota:</strong> Após criar o projeto, nossa IA começará a gerar os criativos automaticamente. Você será notificado quando estiverem prontos para aprovação.
+              <strong>Nota:</strong> Após criar a campanha, nossa IA começará a gerar os criativos automaticamente baseados no template selecionado. Você será notificado quando estiverem prontos para aprovação.
             </p>
           </Card>
         </div>

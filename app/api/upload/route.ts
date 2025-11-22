@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireAuth } from "@/lib/api-auth"
 import {
-  uploadFile,
+  uploadFileAdmin,
   getPublicUrl,
   generateUniqueFileName,
   validateFileType,
@@ -79,8 +79,8 @@ export async function POST(request: NextRequest) {
     // Converter File para Buffer
     const buffer = Buffer.from(await file.arrayBuffer())
 
-    // Upload
-    await uploadFile({
+    // Upload usando cliente admin (bypassa RLS)
+    await uploadFileAdmin({
       bucket,
       path,
       file: buffer,

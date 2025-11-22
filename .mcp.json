@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=toyzsriuzltehsrnshsp",
+      "headers": {
+        "apikey": "${NEXT_PUBLIC_SUPABASE_ANON_KEY}"
+      },
+      "description": "Supabase MCP for ScaleBeam project - Database and Storage management"
+    }
+  }
+}

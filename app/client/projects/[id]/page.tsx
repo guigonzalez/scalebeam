@@ -178,6 +178,7 @@ export default async function ClientProjectDetailPage({
               </h2>
               {project.creatives.length > 0 && (
                 <DownloadAllButton
+                  projectId={project.id}
                   projectName={project.name}
                   creativesCount={project.creatives.length}
                 />

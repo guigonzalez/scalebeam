@@ -32,37 +32,71 @@ export function ProjectStatusChange({
   const handleMarkAsReady = async () => {
     setIsChanging(true)
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    try {
+      const response = await fetch(`/api/projects/${projectId}/status`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: "READY",
+          comment: `Projeto marcado como pronto pelo admin`,
+        }),
+      })
 
-    toast.success("Projeto marcado como pronto!", {
-      description: `${projectName} está agora disponível para aprovação do cliente.`,
-    })
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || "Falha ao atualizar status")
+      }
 
-    setIsChanging(false)
+      toast.success("Projeto marcado como pronto!", {
+        description: `${projectName} está agora disponível para aprovação do cliente.`,
+      })
 
-    // Simulate page reload
-    setTimeout(() => {
-      window.location.reload()
-    }, 1500)
+      setTimeout(() => {
+        window.location.reload()
+      }, 1500)
+    } catch (error: any) {
+      toast.error("Erro ao atualizar status", {
+        description: error.message,
+      })
+      setIsChanging(false)
+    }
   }
 
   const handleStartProduction = async () => {
     setIsChanging(true)
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    try {
+      const response = await fetch(`/api/projects/${projectId}/status`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: "IN_PRODUCTION",
+          comment: `Projeto iniciado em produção pelo admin`,
+        }),
+      })
 
-    toast.success("Projeto iniciado!", {
-      description: `${projectName} está agora em produção.`,
-    })
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || "Falha ao atualizar status")
+      }
 
-    setIsChanging(false)
+      toast.success("Projeto iniciado!", {
+        description: `${projectName} está agora em produção.`,
+      })
 
-    // Simulate page reload
-    setTimeout(() => {
-      window.location.reload()
-    }, 1500)
+      setTimeout(() => {
+        window.location.reload()
+      }, 1500)
+    } catch (error: any) {
+      toast.error("Erro ao atualizar status", {
+        description: error.message,
+      })
+      setIsChanging(false)
+    }
   }
 
   if (currentStatus === "APPROVED") {

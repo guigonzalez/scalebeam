@@ -387,6 +387,7 @@ export function CreativeApprovalGrid({
                     <CreativeDownloadButton
                       creativeId={creative.id}
                       creativeName={creative.name}
+                      creativeUrl={creative.url}
                       variant="secondary"
                       size="sm"
                     />

@@ -196,6 +196,23 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    // Se está solicitando um novo template, criar o template em modo PENDING_APPROVAL
+    if (validatedData.newTemplateRequest && projectType === "TEMPLATE_CREATION") {
+      await prisma.template.create({
+        data: {
+          name: validatedData.newTemplateRequest.name,
+          description: (validatedData.newTemplateRequest as any).description || null,
+          imageUrl: validatedData.newTemplateRequest.keyVisualUrl,
+          brandId: validatedData.brandId,
+          projectId: project.id,
+          templateStatus: "PENDING_APPROVAL",
+          isActive: false,
+          platforms: JSON.stringify(validatedData.newTemplateRequest.platforms),
+          formats: JSON.stringify(validatedData.newTemplateRequest.formats),
+        },
+      })
+    }
+
     // Registrar atividade
     await prisma.activityLog.create({
       data: {

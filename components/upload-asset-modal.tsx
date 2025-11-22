@@ -42,16 +42,75 @@ export function UploadAssetModal({ brandId, brandName }: UploadAssetModalProps) 
     setError(null)
 
     try {
-      const formData = new FormData()
-      formData.append("file", file)
+      const FILE_SIZE_LIMIT = 4 * 1024 * 1024 // 4MB
 
-      const response = await fetch(`/api/brands/${brandId}/assets`, {
-        method: "POST",
-        body: formData,
-      })
+      // Para arquivos maiores que 4MB, usar upload direto
+      if (file.size > FILE_SIZE_LIMIT) {
+        // 1. Obter URL assinada
+        const signedUrlResponse = await fetch(
+          `/api/brands/${brandId}/assets/signed-upload`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              fileName: file.name,
+              fileType: file.type,
+              fileSize: file.size,
+            }),
+          }
+        )
 
-      if (!response.ok) {
-        throw new Error("Erro ao fazer upload")
+        if (!signedUrlResponse.ok) {
+          throw new Error("Erro ao preparar upload")
+        }
+
+        const { uploadUrl, path, fileName } = await signedUrlResponse.json()
+
+        // 2. Upload direto para Supabase
+        const uploadResponse = await fetch(uploadUrl, {
+          method: "PUT",
+          body: file,
+          headers: {
+            "Content-Type": file.type,
+            "x-upsert": "true",
+          },
+        })
+
+        if (!uploadResponse.ok) {
+          throw new Error("Erro ao fazer upload do arquivo")
+        }
+
+        // 3. Confirmar upload no banco de dados
+        const confirmResponse = await fetch(
+          `/api/brands/${brandId}/assets/confirm`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              path,
+              fileName: file.name,
+              fileType: file.type,
+              fileSize: file.size,
+            }),
+          }
+        )
+
+        if (!confirmResponse.ok) {
+          throw new Error("Erro ao registrar arquivo")
+        }
+      } else {
+        // Para arquivos menores, usar método tradicional
+        const formData = new FormData()
+        formData.append("file", file)
+
+        const response = await fetch(`/api/brands/${brandId}/assets`, {
+          method: "POST",
+          body: formData,
+        })
+
+        if (!response.ok) {
+          throw new Error("Erro ao fazer upload")
+        }
       }
 
       setOpen(false)

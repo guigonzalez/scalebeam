@@ -2,8 +2,21 @@ import { createClient } from "@supabase/supabase-js"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
+// Cliente público (com RLS)
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+// Cliente de serviço (bypassa RLS) - usar apenas server-side
+// Se não houver service role key, usa o cliente público (fallback para desenvolvimento)
+export const supabaseAdmin = supabaseServiceRoleKey
+  ? createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    })
+  : supabase
 
 /**
  * Tipos de arquivos permitidos
@@ -25,12 +38,12 @@ export const ALLOWED_FILE_TYPES = {
 export const MAX_FILE_SIZES = {
   image: 10 * 1024 * 1024, // 10MB
   video: 100 * 1024 * 1024, // 100MB
-  document: 5 * 1024 * 1024, // 5MB
+  document: 50 * 1024 * 1024, // 50MB (aumentado para brandbooks)
   spreadsheet: 2 * 1024 * 1024, // 2MB
 } as const
 
 /**
- * Upload de arquivo para bucket
+ * Upload de arquivo para bucket (client-side ou com RLS)
  */
 export async function uploadFile({
   bucket,
@@ -48,6 +61,35 @@ export async function uploadFile({
     .upload(path, file, {
       contentType,
       upsert: false, // Não sobrescrever arquivos existentes
+    })
+
+  if (error) {
+    throw new Error(`Upload failed: ${error.message}`)
+  }
+
+  return data
+}
+
+/**
+ * Upload de arquivo para bucket (server-side, bypassa RLS)
+ * Usar esta função em rotas API do servidor
+ */
+export async function uploadFileAdmin({
+  bucket,
+  path,
+  file,
+  contentType,
+}: {
+  bucket: string
+  path: string
+  file: File | Buffer
+  contentType?: string
+}) {
+  const { data, error } = await supabaseAdmin.storage
+    .from(bucket)
+    .upload(path, file, {
+      contentType,
+      upsert: false,
     })
 
   if (error) {

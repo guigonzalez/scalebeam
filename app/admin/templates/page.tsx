@@ -4,11 +4,11 @@ import { redirect } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Layers, Edit } from "lucide-react"
+import { Layers, Edit, Plus } from "lucide-react"
 import Image from "next/image"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { TemplateModal } from "@/components/template-modal"
+import { AdminTemplateModal } from "@/components/admin-template-modal"
 
 export const dynamic = 'force-dynamic'
 
@@ -25,27 +25,41 @@ export default async function TemplatesPage() {
     redirect("/login")
   }
 
-  const templates = await prisma.template.findMany({
-    include: {
-      brand: {
-        select: {
-          id: true,
-          name: true,
-          organization: {
-            select: {
-              name: true,
+  const [templates, brands] = await Promise.all([
+    prisma.template.findMany({
+      include: {
+        brand: {
+          select: {
+            id: true,
+            name: true,
+            organization: {
+              select: {
+                name: true,
+              },
             },
           },
         },
-      },
-      _count: {
-        select: {
-          projects: true,
+        _count: {
+          select: {
+            projects: true,
+          },
         },
       },
-    },
-    orderBy: { createdAt: "desc" },
-  })
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.brand.findMany({
+      select: {
+        id: true,
+        name: true,
+        organization: {
+          select: {
+            name: true,
+          },
+        },
+      },
+      orderBy: { name: "asc" },
+    }),
+  ])
 
   return (
     <div className="flex flex-col gap-6 p-8">
@@ -61,6 +75,12 @@ export default async function TemplatesPage() {
             </div>
           </div>
         </div>
+        <AdminTemplateModal mode="create" brands={brands}>
+          <Button>
+            <Plus className="h-4 w-4 mr-2" />
+            Criar Template
+          </Button>
+        </AdminTemplateModal>
       </div>
 
       <Card>
@@ -127,11 +147,11 @@ export default async function TemplatesPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2">
-                        <TemplateModal mode="edit" template={template}>
+                        <AdminTemplateModal mode="edit" template={template} brands={brands}>
                           <Button variant="ghost" size="icon">
                             <Edit className="h-4 w-4" />
                           </Button>
-                        </TemplateModal>
+                        </AdminTemplateModal>
                       </div>
                     </td>
                   </tr>

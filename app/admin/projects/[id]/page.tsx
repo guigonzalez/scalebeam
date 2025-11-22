@@ -73,6 +73,7 @@ export default async function ProjectDetailPage({
         <div className="flex gap-2">
           {project.creatives.length > 0 && (
             <DownloadAllButton
+              projectId={project.id}
               projectName={project.name}
               creativesCount={project.creatives.length}
             />
@@ -122,7 +123,7 @@ export default async function ProjectDetailPage({
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold">Briefing</h2>
                 {project.briefingUrl && (
-                  <DownloadBriefingButton projectName={project.name} />
+                  <DownloadBriefingButton projectName={project.name} briefingUrl={project.briefingUrl} />
                 )}
               </div>
               <div className="overflow-x-auto">

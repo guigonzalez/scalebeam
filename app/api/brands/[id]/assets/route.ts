@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { uploadFile, getPublicUrl, generateUniqueFileName } from "@/lib/supabase-storage"
+import { uploadFileAdmin, getPublicUrl, generateUniqueFileName } from "@/lib/supabase-storage"
+
+// Configuração para aceitar arquivos grandes (até 50MB)
+export const runtime = 'nodejs'
+export const maxDuration = 60 // segundos
 
 export async function POST(
   request: NextRequest,
@@ -43,12 +47,15 @@ export async function POST(
     const fileName = generateUniqueFileName(file.name)
     const filePath = `${brand.organizationId}/${brandId}/${fileName}`
 
+    // Converter File para Buffer
+    const buffer = Buffer.from(await file.arrayBuffer())
+
     let uploadData
     try {
-      uploadData = await uploadFile({
+      uploadData = await uploadFileAdmin({
         bucket: "assets",
         path: filePath,
-        file,
+        file: buffer,
         contentType: file.type,
       })
     } catch (uploadError) {

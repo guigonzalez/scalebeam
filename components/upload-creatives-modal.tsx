@@ -35,26 +35,75 @@ export function UploadCreativesModal({
 
     setIsUploading(true)
 
-    // Simulate upload progress
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2500)),
-      {
-        loading: `Fazendo upload de ${selectedFiles.length} arquivo(s)...`,
-        success: `${selectedFiles.length} criativo(s) adicionado(s) com sucesso!`,
-        error: "Erro ao fazer upload",
+    try {
+      const uploadedCreatives: any[] = []
+
+      // Upload each file to Supabase Storage
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i]
+
+        const formData = new FormData()
+        formData.append("file", file)
+        formData.append("bucket", "creatives")
+        formData.append("folder", projectId)
+
+        const uploadResponse = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        })
+
+        if (!uploadResponse.ok) {
+          const error = await uploadResponse.json()
+          throw new Error(error.error || `Falha ao fazer upload de ${file.name}`)
+        }
+
+        const uploadData = await uploadResponse.json()
+
+        // Determine format based on MIME type
+        let format = "IMAGE"
+        if (file.type.startsWith("video/")) {
+          format = "VIDEO"
+        }
+
+        uploadedCreatives.push({
+          name: uploadData.originalName,
+          url: uploadData.url,
+          format,
+          thumbnailUrl: file.type.startsWith("image/") ? uploadData.url : null,
+        })
       }
-    )
 
-    await new Promise(resolve => setTimeout(resolve, 2500))
+      // Register all creatives in the database
+      const creativesResponse = await fetch(`/api/projects/${projectId}/creatives`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          creatives: uploadedCreatives,
+        }),
+      })
 
-    setIsUploading(false)
-    setIsOpen(false)
-    setSelectedFiles(null)
+      if (!creativesResponse.ok) {
+        const error = await creativesResponse.json()
+        throw new Error(error.error || "Falha ao registrar criativos")
+      }
 
-    // Simulate page reload
-    setTimeout(() => {
-      window.location.reload()
-    }, 1500)
+      toast.success(`${uploadedCreatives.length} criativo(s) adicionado(s) com sucesso!`)
+
+      setIsUploading(false)
+      setIsOpen(false)
+      setSelectedFiles(null)
+
+      setTimeout(() => {
+        window.location.reload()
+      }, 1500)
+    } catch (error: any) {
+      toast.error("Erro ao fazer upload", {
+        description: error.message,
+      })
+      setIsUploading(false)
+    }
   }
 
   return (

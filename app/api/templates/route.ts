@@ -5,17 +5,27 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const brandId = searchParams.get("brandId")
+    const status = searchParams.get("status") // APPROVED, PENDING_APPROVAL, REJECTED
 
     if (!brandId) {
       return NextResponse.json({ error: "brandId parameter is required" }, { status: 400 })
     }
 
+    const where: any = {
+      isActive: true,
+      brandId: brandId,
+    }
+
+    // Se status foi especificado, filtrar por ele
+    // Se não foi especificado, retornar apenas APPROVED (comportamento padrão)
+    if (status) {
+      where.templateStatus = status
+    } else {
+      where.templateStatus = "APPROVED"
+    }
+
     const templates = await prisma.template.findMany({
-      where: {
-        isActive: true,
-        brandId: brandId,
-        templateStatus: "APPROVED", // Apenas templates aprovados
-      },
+      where,
       orderBy: { name: "asc" },
     })
 

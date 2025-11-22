@@ -3,12 +3,13 @@ import { auth, signOut } from "@/lib/auth"
 import { redirect, notFound } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { LogOut, Download, Trash2, Image as ImageIcon } from "lucide-react"
+import { LogOut, Download, Trash2, Image as ImageIcon, FileText, Video } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { formatFileSize } from "@/lib/constants"
 import { UploadAssetModal } from "@/components/upload-asset-modal"
 import { DeleteAssetButton } from "@/components/delete-asset-button"
+import { AssetPreviewModal } from "@/components/asset-preview-modal"
 
 export const dynamic = "force-dynamic"
 
@@ -120,8 +121,19 @@ export default async function BrandAssetsPage({
                     className="object-cover"
                   />
                 ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <ImageIcon className="h-16 w-16 text-muted-foreground" />
+                  <div className="flex flex-col items-center justify-center h-full">
+                    {asset.type === "application/pdf" ? (
+                      <FileText className="h-16 w-16 text-muted-foreground mb-2" />
+                    ) : asset.type.startsWith("video/") ? (
+                      <Video className="h-16 w-16 text-muted-foreground mb-2" />
+                    ) : (
+                      <ImageIcon className="h-16 w-16 text-muted-foreground mb-2" />
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      {asset.type === "application/pdf" && "PDF"}
+                      {asset.type.startsWith("video/") && "Vídeo"}
+                      {!asset.type.startsWith("video/") && asset.type !== "application/pdf" && "Arquivo"}
+                    </p>
                   </div>
                 )}
               </div>
@@ -132,11 +144,14 @@ export default async function BrandAssetsPage({
               </p>
 
               <div className="flex gap-2">
-                <Button asChild size="sm" variant="outline" className="flex-1">
-                  <a href={asset.url} download target="_blank" rel="noopener">
-                    <Download className="h-4 w-4" />
-                  </a>
-                </Button>
+                <AssetPreviewModal
+                  asset={{
+                    id: asset.id,
+                    name: asset.name,
+                    url: asset.url,
+                    type: asset.type,
+                  }}
+                />
                 <DeleteAssetButton
                   brandId={brand.id}
                   assetId={asset.id}
